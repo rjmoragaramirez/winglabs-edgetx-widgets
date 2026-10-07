@@ -10,7 +10,7 @@
 local VERSION = "0.2.0"
 -- SD folder name must stay <= 13 chars (EdgeTX path buffer); display name <= 20 chars
 local DEFAULT_PATH = "/WIDGETS/WLAttitudeInd/"
-local THEME_NAMES = { "Dark", "Light", "Navy", "Sunlight", "Night" }
+local THEME_NAMES = { "Dark", "Light", "Navy", "Sunlight", "Night", "Carbon" }
 
 local options = {
   { "Theme", CHOICE or VALUE, 1, CHOICE and THEME_NAMES or 1, (not CHOICE) and #THEME_NAMES or nil },

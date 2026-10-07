@@ -40,6 +40,14 @@ local THEMES = {
     sky = 0x2A0808, ground = 0x120303, horizon = 0xFF5252, ladder = 0xB71C1C,
     aircraft = 0xFFAB40, ink = 0x000000,
   },
+  { -- 6 Carbon (neutral graphite, orange accent)
+    bg = 0x141414, surface = 0x222222, border = 0x383838,
+    text = 0xF2F2F2, muted = 0x9A9A9A, accent = 0xFF8A1F,
+    ok = 0x3DDC84, warn = 0xFFC93C, crit = 0xFF5252, onPill = 0x141414,
+    sky = 0x0078D2, ground = 0x915028, horizon = 0xF0F6FA, ladder = 0xF0F6FA,
+    aircraft = 0xFFD642, ink = 0x070F17,
+    stripBg = 0x0F0F0F, stripLine = 0xFF8A1F, stripDiv = 0x383838, stripMuted = 0xB5B5B5,
+  },
 }
 
 -- Resolve a theme index into EdgeTX color flags (done once per theme change).

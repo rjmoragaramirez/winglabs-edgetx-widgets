@@ -29,7 +29,7 @@ responsive for the whole flight.
 
 | Option | Values | Default |
 |---|---|---|
-| Theme | Dark, Light, Navy, Sunlight, Night | Dark |
+| Theme | Dark, Light, Navy, Sunlight, Night, Carbon | Dark |
 | Units | Imperial, Metric | Imperial |
 | Cells | 0 = auto, 1–14 | 0 |
 | CellWarn / CellCrit | centivolts per cell (350 = 3.50 V) | 350 / 330 |

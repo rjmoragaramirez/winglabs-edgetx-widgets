@@ -121,15 +121,16 @@ One banner shows the most important alert at any moment, in this priority order:
 
 ![Themes](article_images/themes.png)
 
-There are five themes:
+There are six themes:
 
 - **Dark**: the default.
 - **Light**.
 - **Navy**.
 - **Sunlight**: black and white with saturated colors, for direct sun.
 - **Night**: red only, to preserve night vision.
+- **Carbon**: neutral graphite with an orange accent.
 
-Dark, Light and Navy use the same sky and earth colors as the WingLabs attitude indicator.
+Dark, Light, Navy and Carbon use the same sky and earth colors as the WingLabs attitude indicator.
 
 In a small screen zone the widget switches to a compact layout with flight mode, cell voltage,
 altitude, link quality and home distance:
@@ -197,7 +198,7 @@ Open *Screens setup*, select the widget's zone and choose *Widget settings*:
 
 | Option | Values | Default | Notes |
 |---|---|---|---|
-| Theme | Dark, Light, Navy, Sunlight, Night | Dark | |
+| Theme | Dark, Light, Navy, Sunlight, Night, Carbon | Dark | |
 | Units | Imperial, Metric | Imperial | The photo map works in imperial |
 | Cells | 0 = auto, 1–14 | 0 | Auto-detects the cell count when disarmed |
 | CellWarn | 300–420 | 350 | Centivolts per cell: 350 = 3.50 V (BATTERY LOW) |

@@ -21,7 +21,7 @@ OUT = os.path.join(HERE, "out")
 PHOTO = (os.environ.get("WL_SIM_WLMAP") or os.path.join(REPO, "tools", "maptiles", "out", "WLMAP")).replace("\\", "/").rstrip("/") + "/"
 EDGE_LIMIT = 20000  # instructions per Lua call before EdgeTX raises "CPU limit"
 
-THEMES = ["Dark", "Light", "Navy", "Sunlight", "Night"]
+THEMES = ["Dark", "Light", "Navy", "Sunlight", "Night", "Carbon"]
 # Synthetic flight home: AMA International Aeromodeling Center, Muncie, Indiana (public example).
 # Override with WL_SIM_HOME="lat,lon" to fly the simulator over your own field.
 HOME = tuple(float(v) for v in os.environ.get("WL_SIM_HOME", "40.1666,-85.3195").split(","))
