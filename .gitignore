@@ -1,0 +1,7 @@
+# Photo map tiles: generated per field with tools/maptiles/make_field.py (large, location-specific)
+**/tools/maptiles/out/
+# Simulator output
+**/tools/sim/out/
+__pycache__/
+*.pyc
+*.tmp
