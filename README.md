@@ -2,6 +2,8 @@
 
 *WingLabs · October 2026*
 
+**Download:** [github.com/rjmoragaramirez/winglabs-edgetx-widgets](https://github.com/rjmoragaramirez/winglabs-edgetx-widgets) (free and open source, MIT license)
+
 ![WL Avionics on a TX16S MK2](article_images/wl_avionics.png)
 
 When you fly an INAV aircraft over ELRS, your radio already receives everything that matters:
