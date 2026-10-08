@@ -115,6 +115,8 @@ def main():
     ap.add_argument("--darken", type=float, default=0.8, help="brightness factor so overlays stand out")
     ap.add_argument("--quality", type=int, default=80)
     ap.add_argument("--workers", type=int, default=3, help="parallel downloads (be polite)")
+    ap.add_argument("--min-level", type=int, default=1,
+                    help="first zoom level with photo (4 = 1000 ft): skip the fine levels for big areas")
     ap.add_argument("--dry-run", action="store_true", help="only print the tile plan")
     ap.add_argument("--out", default=None, help="output WLMAP folder (default: tools/maptiles/out/WLMAP)")
     a = ap.parse_args()
@@ -137,6 +139,8 @@ def main():
         levels = {}
         print(f"{rk}: ring {ring} px")
         for li, step in enumerate(STEPS[:NLEVELS], start=1):
+            if li < a.min_level:
+                continue
             cov = min(radius_m, fine[li - 1] * MI) if li <= len(fine) else radius_m
             mpp = step / ring                     # ground meters per screen pixel at this zoom
             n = min(RADIOS[rk]["max_n"], max(1, math.ceil(2 * cov / (mpp * TILE))))
