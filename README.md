@@ -1,6 +1,6 @@
-# WingLabs EdgeTX Widgets: INAV telemetry, attitude indicator and moving map for color radios
+# WingLabs EdgeTX Widgets: INAV telemetry, attitude indicator, moving map and flight statistics for color radios
 
-*WingLabs · October 2026*
+*WingLabs · October 2026 · updated November 2026*
 
 **Download:** [github.com/rjmoragaramirez/winglabs-edgetx-widgets](https://github.com/rjmoragaramirez/winglabs-edgetx-widgets) (free and open source, MIT license)
 
@@ -10,16 +10,19 @@ When you fly an INAV aircraft over ELRS, your radio already receives everything 
 battery, link quality, GPS position, altitude, speed, heading and attitude. The WingLabs EdgeTX
 widgets turn that stream into a clean, readable cockpit on the radio screen: a full-screen
 dashboard with an attitude indicator, a moving map with a satellite photo of your flying field,
-and alerts that tell you what you need to know without nagging you.
+alerts that tell you what you need to know without nagging you, and a statistics page for every
+flight once you land.
 
-There are three widgets. They share the same telemetry engine, alerts and themes and differ in
-what sits in the center of the screen:
+There are four widgets. The three flight widgets share the same telemetry engine, alerts and
+themes and differ in what sits in the center of the screen; the fourth, WL Flight Stats, records
+each flight and shows its charts after landing:
 
 | Widget | Center of the screen | Best for |
 |---|---|---|
 | **WL Attitude Ind** | Large attitude indicator with ROLL/PITCH readout | Line-of-sight flying, aerobatics, checking the attitude at a glance |
 | **WL Avionics** | Attitude indicator on top, moving map below | General flying: everything on one screen |
 | **WL Maps** | Full-height moving map | FPV and longer flights, orientation and finding the model |
+| **WL Flight Stats** | Voltage, current, altitude and speed charts of the last flight, max altitude and max speed | Reviewing each flight after landing; keeps the last 8 flights per model |
 
 Each one comes in two builds: **TX16S MK2** (480×272) and **TX16S MK3** (800×480).
 
@@ -29,7 +32,7 @@ Each one comes in two builds: **TX16S MK2** (480×272) and **TX16S MK3** (800×4
 
 ![WL Attitude Ind](article_images/wl_attitude_ind.png)
 
-All three widgets share the same frame around the center area:
+All three flight widgets share the same frame around the center area:
 
 - **Top bar**
   - **Flight mode pill**, colored by severity: ANGLE, HORIZON, ACRO, MANUAL, ALT HOLD, POS HOLD,
@@ -137,6 +140,27 @@ altitude, link quality and home distance:
 
 ![Compact layout](article_images/compact.png)
 
+### Flight statistics
+
+![WL Flight Stats](article_images/wl_flight_stats.png)
+
+**WL Flight Stats** records the flight in the background while the model is armed, even while
+another screen is shown. When you disarm, its page shows:
+
+- four charts over the flight time: **voltage** (with the sag under load), **current**,
+  **altitude** and **ground speed**, with a dot on the altitude and speed peaks;
+- **max altitude** and **max speed**, with the moment they were reached;
+- used mAh, the minimum cell voltage and the maximum distance from home;
+- the flight time, date and time of the landing.
+
+The last **8 flights of each model** are kept on the SD card. Open the widget in full screen and
+turn the roller, or tap the left or right half of the screen, to browse older flights. Arming on
+the bench for less than 20 seconds (the *MinFlight* option) is not saved. If the link is lost
+while armed for 20 seconds, for example when you unplug the battery without disarming, the
+flight is saved up to that point.
+
+In a small zone it shows max altitude, max speed, used mAh and minimum cell of the last flight.
+
 ---
 
 ## 2. Requirements
@@ -169,9 +193,11 @@ folders into `/WIDGETS/` on the card. Use the build for your radio:
 | WL Attitude Ind | `WLAttitudeInd\WIDGETS\WLAttitudeInd` | `/WIDGETS/WLAttitudeInd/` |
 | WL Avionics | `WLAvionics\WIDGETS\WLAvionics` | `/WIDGETS/WLAvionics/` |
 | WL Maps | `WLMaps\WIDGETS\WLMaps` | `/WIDGETS/WLMaps/` |
+| WL Flight Stats | `WLFlightStats\WIDGETS\WLFlightStats` | `/WIDGETS/WLFlightStats/` |
 
-You can install one, two or all three. Do not rename the folders to anything longer: EdgeTX
-silently ignores widget folders with names over 13 characters.
+Install any combination. Do not rename the folders to anything longer: EdgeTX
+silently ignores widget folders with names over 13 characters. Copy WL Flight Stats together with
+its `logs` folder: the flights are saved there, and EdgeTX Lua scripts cannot create folders.
 
 ### Step 2: discover the telemetry sensors
 
@@ -188,7 +214,7 @@ to restart anything.
    This matters: with the top bar on, or with the "App mode" layout, EdgeTX draws its own menu
    button (the EdgeTX logo) over the top-left corner of the widget. You still reach the menus with
    the SYS and MDL keys.
-4. Tap the zone and select **WL Attitude Ind**, **WL Avionics** or **WL Maps**.
+4. Tap the zone and select **WL Attitude Ind**, **WL Avionics**, **WL Maps** or **WL Flight Stats**.
 
 Repeat with more screens if you want more than one widget; swipe between them in flight.
 
@@ -207,6 +233,9 @@ Open *Screens setup*, select the widget's zone and choose *Widget settings*:
 | Sounds | on/off | on | Tones and voice |
 | Haptic | on/off | on | Vibration pulses |
 | MapPhoto | on/off | on | WL Avionics and WL Maps only |
+
+WL Flight Stats has fewer options: Theme, Units and Cells as above, plus **MinFlight** (5–300 s,
+default 20): how long the model must be armed for the flight to be saved.
 
 How strongly the radio vibrates also depends on *Radio Setup → Haptic* (length and strength).
 
@@ -247,6 +276,8 @@ whose photo area contains home.
    times each.
 5. **Land and disarm.** One pulse and the disarm tone. Switch the model off: three "telemetry lost"
    alerts and then silence. The last position stays on screen.
+6. **Review the flight.** Swipe to the WL Flight Stats screen: the flight you just landed is
+   already there.
 
 ---
 
@@ -261,6 +292,8 @@ whose photo area contains home.
 | Horizon moves the wrong way | Pitch/roll signs can be flipped in `telem.lua` (`PITCH_SIGN`, `ROLL_SIGN`). |
 | No satellite photo | `/WLMAP/` missing or in the wrong place (it must be at the SD root), MapPhoto off, metric units, home outside the photo area, or tiles made for the other radio model. |
 | The MK3 widgets do not appear | The MK3 build needs EdgeTX 2.12 or later. |
+| WL Flight Stats does not save flights | The `logs` folder must exist in `/WIDGETS/WLFlightStats/`, the flight must last longer than *MinFlight*, and the FM sensor must be discovered (it gives the arm state). |
+| Older flights cannot be selected | EdgeTX only passes touch and roller events to a widget in full screen: open it full screen first. |
 
 ---
 
@@ -271,11 +304,16 @@ for a whole flight:
 
 - Plain `.lua` files: EdgeTX compiles and caches them itself.
 - Every module is loaded once at start-up; nothing is read from the SD card during normal flight
-  (photo tiles excepted, and only when crossing into a new tile).
+  (photo tiles excepted, and only when crossing into a new tile). WL Flight Stats writes one small
+  file when a flight ends.
 - No manual garbage collection and almost no garbage per frame (under 1 KB).
 - Telemetry is polled at a fixed rate and screen text is formatted only when a value changes.
 - The attitude indicator and map use vector lines only, with preallocated tables.
 - Colors come from semantic theme tokens, so new themes are easy to add.
+- WL Flight Stats keeps memory bounded on flights of any length: samples are grouped into
+  intervals that keep the lowest voltage and the highest current, altitude and speed, and the
+  intervals double in length when the buffer fills. Its page is built in stages, one chart per
+  frame, so no call comes near the processor limit.
 - No global variables, and the model's timers are never touched.
 
 Every build has a **desktop simulator**: `tools/sim/run_sim.py`, which needs Python with lupa and
@@ -305,13 +343,13 @@ It also renders screenshots like the ones in this article.
 | WL Attitude Ind | 0.2.0 | Version 0.1 flown on a TX16S MK2; 0.2 validated in the simulator |
 | WL Avionics | 0.2.1 | Validated in the simulator |
 | WL Maps | 0.1.0 | Validated in the simulator |
+| WL Flight Stats | 0.1.0 | Validated in the simulator (flights, 8-flight rotation, reload); installed on a TX16S MK2, first flight pending |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 
 Still to confirm on the radio: the exact font sizes, how the vibration pulses feel, tile loading
 time when crossing photo tiles, and that the aircraft position over the photo matches the ground.
 
-Ideas for next versions: custom voice files for flight modes, a flight statistics page with
-maximum altitude, speed and distance, and log playback.
+Ideas for next versions: custom voice files for flight modes and log playback.
 
 ---
 
@@ -322,6 +360,7 @@ maximum altitude, speed and distance, and log playback.
   WLAttitudeInd/        WIDGETS/WLAttitudeInd  + tools/sim
   WLAvionics/           WIDGETS/WLAvionics     + tools/sim + tools/maptiles (photo tile generator)
   WLMaps/               WIDGETS/WLMaps         + tools/sim
+  WLFlightStats/        WIDGETS/WLFlightStats  + tools/sim
 800x480px/              TX16S MK3 builds (EdgeTX 2.12+), same structure
 article_images/         images used in this document
 ```
