@@ -343,7 +343,7 @@ It also renders screenshots like the ones in this article.
 | WL Attitude Ind | 0.2.0 | Version 0.1 flown on a TX16S MK2; 0.2 validated in the simulator |
 | WL Avionics | 0.2.1 | Validated in the simulator |
 | WL Maps | 0.1.0 | Validated in the simulator |
-| WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flight saved after landing and charts display correctly; history browsing still to confirm on the radio |
+| WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flights saved after landing, charts, history browsing and reload after a power cycle confirmed |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 
 Still to confirm on the radio: the exact font sizes, how the vibration pulses feel, tile loading
