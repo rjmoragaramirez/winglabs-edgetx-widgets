@@ -49,7 +49,7 @@ end
 function lcd.drawText() end
 
 function loadScript(path, mode)
-  local rel = path:gsub("^/WIDGETS/WLFlightStats/", "")
+  local rel = string.gsub(path, "^/WIDGETS/WLFlightStats/", "")
   return loadfile(ROOT .. rel, "t")
 end
 
@@ -63,7 +63,7 @@ model = { getInfo = function() return { name = M.modelName } end }
 local rio = io
 M.ioWrites, M.ioReads = 0, 0
 local function mapPath(p)
-  local rel = p:match("^/WIDGETS/WLFlightStats/logs/(.*)$")
+  local rel = string.match(p, "^/WIDGETS/WLFlightStats/logs/(.*)$")
   assert(rel, "io outside the widget logs folder: " .. p)
   return LOGS .. rel
 end
@@ -98,6 +98,9 @@ local INT_KEYS = { x = 1, y = 1, w = 1, h = 1, radius = 1, thickness = 1, rounde
                    endAngle = 1, opacity = 1, bgOpacity = 1, scrollDir = 1 }
 
 lvgl = { LCD_SCALE = 1 }
+
+-- EdgeTX Lua strings have no metatable: ("x"):gsub() raises "attempt to index a string value".
+debug.setmetatable("", nil)
 M.tree = {}
 
 local function checkPts(pts, where)

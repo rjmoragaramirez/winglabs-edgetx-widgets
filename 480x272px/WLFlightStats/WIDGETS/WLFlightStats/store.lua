@@ -9,7 +9,9 @@ local FIELDS = { "seq", "year", "mon", "day", "hour", "min", "dur", "maxAlt", "t
                  "minV", "maxA", "used", "maxDist", "cells", "n" }
 local SERIES = { "v", "c", "a", "s" }
 
+-- EdgeTX strings have no metatable: always call string.* functions, never s:method()
 local floor, concat, sort = math.floor, table.concat, table.sort
+local gsub, sub, gmatch = string.gsub, string.sub, string.gmatch
 
 local function readAll(path)
   local f = io.open(path, "r")
@@ -39,7 +41,7 @@ local function modelKey()
     local info = model.getInfo()
     name = info and info.name or ""
   end
-  local key = name:gsub("[^%w]", ""):sub(1, 12)
+  local key = sub(gsub(name, "[^%w]", ""), 1, 12)
   if key == "" then key = "MODEL" end
   return key
 end
@@ -56,9 +58,9 @@ return function(dir)
     st.list = {}
     local txt = readAll(base .. ".idx")
     if not txt then return end
-    for line in txt:gmatch("[^\n]+") do
+    for line in gmatch(txt, "[^\n]+") do
       local f, i = {}, 0
-      for num in line:gmatch("%-?%d+") do
+      for num in gmatch(line, "%-?%d+") do
         i = i + 1
         local k = FIELDS[i]
         if k then f[k] = tonumber(num) end
@@ -104,14 +106,14 @@ return function(dir)
     local txt = readAll(slotPath(sum.seq))
     if not txt then return nil end
     local out, row = {}, 0
-    for line in txt:gmatch("[^\n]+") do
+    for line in gmatch(txt, "[^\n]+") do
       if row == 0 then
         if tonumber(line) ~= sum.seq then return nil end
       else
         local k = SERIES[row]
         if not k then break end
         local s, i = {}, 0
-        for num in line:gmatch("%-?%d+") do i = i + 1; s[i] = tonumber(num) end
+        for num in gmatch(line, "%-?%d+") do i = i + 1; s[i] = tonumber(num) end
         out[k] = s
       end
       row = row + 1
