@@ -19,6 +19,7 @@ local THEMES = {
     sky = 0x0078D2, ground = 0x915028, horizon = 0xF0F6FA, ladder = 0xF0F6FA,
     aircraft = 0xFFD642, ink = 0x070F17,
     mapBg = 0xF4F7FA, mapRing = 0xC9D2DC, mapTrail = 0x0A6CDB,
+    plateText = 0xF0F6FA, plateMuted = 0x9AB8C8,  -- map labels on dark plates
   },
   { -- 3 Navy
     bg = 0x0A1628, surface = 0x11223D, border = 0x1F3A63,

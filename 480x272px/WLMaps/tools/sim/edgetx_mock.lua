@@ -46,12 +46,16 @@ function lcd.RGB(r, g, b)
   return 0x1000000 | r
 end
 function lcd.drawText() end
+function lcd.sizeText(s, f) return #tostring(s) * (f == SMLSIZE and 6 or 9), 16 end
+
+model = {}
+function model.getInfo() return { name = M.modelName or os.getenv("WL_SIM_MODEL") or "Extra 330", bitmap = "" } end
 
 function loadScript(path, mode)
-  if path:sub(1, 7) == "/WLMAP/" then
-    return loadfile(PHOTO_ROOT .. path:sub(8), "t")   -- nil when missing, like EdgeTX
+  if string.sub(path, 1, 7) == "/WLMAP/" then
+    return loadfile(PHOTO_ROOT .. string.sub(path, 8), "t")   -- nil when missing, like EdgeTX
   end
-  local rel = path:gsub("^/WIDGETS/WLMaps/", "")
+  local rel = string.gsub(path, "^/WIDGETS/WLMaps/", "")
   return loadfile(ROOT .. rel, "t")
 end
 
@@ -73,6 +77,9 @@ local INT_KEYS = { x = 1, y = 1, w = 1, h = 1, radius = 1, thickness = 1, rounde
                    endAngle = 1, opacity = 1, bgOpacity = 1, scrollDir = 1 }
 
 lvgl = { LCD_SCALE = 1 }
+
+-- EdgeTX Lua strings have no metatable: ("x"):sub() raises "attempt to index a string value".
+debug.setmetatable("", nil)
 M.tree = {}
 
 local function checkPts(pts, where)

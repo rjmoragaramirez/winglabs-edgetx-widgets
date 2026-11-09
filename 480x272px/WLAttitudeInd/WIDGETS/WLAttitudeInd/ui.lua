@@ -198,8 +198,20 @@ return function(wgt)
     add(label(floor(W * 0.58), px(10), floor(W * 0.27), str("radio"), SMLSIZE, T.muted, RIGHT))
     add(label(W - pad - floor(W * 0.14), px(6), floor(W * 0.14), str("lq"), BOLD, lqColor, RIGHT))
 
+    -- Model name from the radio's model settings (widgets are rebuilt when the model changes)
+    local info = model and model.getInfo and model.getInfo()
+    local modelName = info and info.name or ""
+
     -- Battery card
     local bw = side - 2 * ip
+    -- long names (up to 15 chars) drop to the small font, then get cut, so they never wrap onto "WingLabs"
+    local nameFont, nameW = 0, bw - px(6)
+    if lcd.sizeText then
+      if lcd.sizeText(modelName, 0) > nameW then nameFont = SMLSIZE end
+      while #modelName > 1 and lcd.sizeText(modelName, nameFont) > nameW do modelName = string.sub(modelName, 1, -2) end
+    elseif #modelName > 9 then
+      nameFont, modelName = SMLSIZE, string.sub(modelName, 1, 12)
+    end
     add(card(pad, y0, side, bh, {
       label(ip, ip - 2, bw, "BATTERY", SMLSIZE, T.muted),
       label(ip, ip - 2, bw, str("cells"), SMLSIZE, T.muted, RIGHT),
@@ -213,6 +225,7 @@ return function(wgt)
       label(ip, px(118), bw, str("curr"), MIDSIZE, live),
       label(ip, px(150), bw, "USED", SMLSIZE, T.muted),
       label(ip, px(164), bw, str("capa"), 0, live),
+      label(ip, bh - px(42), bw, modelName, nameFont, T.text),    -- current model name
       label(ip, bh - px(22), bw, "WingLabs", SMLSIZE, T.muted),   -- brand mark, bottom left
     }))
 

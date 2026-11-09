@@ -207,6 +207,9 @@ return function(wgt)
     local cx, cy, r = v.cx, v.cy, v.r
     local ink = T.ink or T.bg
     local ring = T.mapRing or T.border
+    -- text on the dark ink plates (Light theme text is dark, so it needs its own tokens)
+    local plateText, plateMuted = T.plateText or T.text, T.plateMuted or T.muted
+    local plateLive = function() return t.linked and plateText or plateMuted end
     local hasHome = function() return t.home ~= nil end
     local noHome = function() return t.home == nil end
     local planeColor = function() return t.linked and T.aircraft or T.muted end
@@ -226,7 +229,7 @@ return function(wgt)
     -- scale label right of the outer ring, or under the HDG plate when the ring fills the width
     local sx, sy = cx + r + px(2), cy - px(15)
     if sx + px(52) > w then sx, sy = w - px(54), px(21) end
-    local scaleLbl = label(sx + px(2), sy - px(1), px(70), function() return v.scaleText end, SMLSIZE, T.text)
+    local scaleLbl = label(sx + px(2), sy - px(1), px(70), function() return v.scaleText end, SMLSIZE, plateText)
     scaleLbl.visible = hasHome
     -- rings turn light over the photo
     local ringColor = function() return v.photoOn and T.horizon or ring end
@@ -251,19 +254,19 @@ return function(wgt)
       scaleLbl,
       -- north arrow
       { type = "rectangle", x = px(4), y = px(2), w = px(28), h = px(22), filled = true, color = ink, opacity = 170 },
-      { type = "line", pts = { { nx, ny + px(14) }, { nx, ny } }, thickness = px(2), color = T.text },
+      { type = "line", pts = { { nx, ny + px(14) }, { nx, ny } }, thickness = px(2), color = plateText },
       { type = "line", pts = { { nx - px(4), ny + px(5) }, { nx, ny }, { nx + px(4), ny + px(5) } },
-        thickness = px(2), color = T.text },
-      label(nx + px(6), ny - px(2), px(14), "N", SMLSIZE, T.text),
+        thickness = px(2), color = plateText },
+      label(nx + px(6), ny - px(2), px(14), "N", SMLSIZE, plateText),
       -- heading
       { type = "rectangle", x = w - px(70), y = px(2), w = px(66), h = px(16), filled = true, color = ink,
         opacity = 170 },
-      label(w - px(76), px(3), px(40), "HDG", SMLSIZE, T.muted, RIGHT),
-      label(w - px(34), px(3), px(30), str("hdg"), SMLSIZE, live, RIGHT),
+      label(w - px(76), px(3), px(40), "HDG", SMLSIZE, plateMuted, RIGHT),
+      label(w - px(34), px(3), px(30), str("hdg"), SMLSIZE, plateLive, RIGHT),
       -- waiting for home
       { type = "rectangle", x = cx - px(70), y = cy + px(10), w = px(140), h = px(20), filled = true, color = ink,
         visible = noHome, children = {
-          label(0, px(2), px(140), "HOME SET ON ARM", SMLSIZE, T.muted, CENTER) } },
+          label(0, px(2), px(140), "HOME SET ON ARM", SMLSIZE, plateMuted, CENTER) } },
       { type = "rectangle", x = 0, y = 0, w = w, h = h, filled = false, thickness = 1, color = T.border },
     }
     for i = 1, #rest do ch[#ch + 1] = rest[i] end
@@ -291,8 +294,20 @@ return function(wgt)
     add(label(floor(W * 0.58), px(10), floor(W * 0.27), str("radio"), SMLSIZE, T.muted, RIGHT))
     add(label(W - pad - floor(W * 0.14), px(6), floor(W * 0.14), str("lq"), BOLD, lqColor, RIGHT))
 
+    -- Model name from the radio's model settings (widgets are rebuilt when the model changes)
+    local info = model and model.getInfo and model.getInfo()
+    local modelName = info and info.name or ""
+
     -- Battery card
     local bw = side - 2 * ip
+    -- long names (up to 15 chars) drop to the small font, then get cut, so they never wrap onto "WingLabs"
+    local nameFont, nameW = 0, bw - px(6)
+    if lcd.sizeText then
+      if lcd.sizeText(modelName, 0) > nameW then nameFont = SMLSIZE end
+      while #modelName > 1 and lcd.sizeText(modelName, nameFont) > nameW do modelName = string.sub(modelName, 1, -2) end
+    elseif #modelName > 9 then
+      nameFont, modelName = SMLSIZE, string.sub(modelName, 1, 12)
+    end
     add(card(pad, y0, side, bh, {
       label(ip, ip - 2, bw, "BATTERY", SMLSIZE, T.muted),
       label(ip, ip - 2, bw, str("cells"), SMLSIZE, T.muted, RIGHT),
@@ -306,6 +321,7 @@ return function(wgt)
       label(ip, px(118), bw, str("curr"), MIDSIZE, live),
       label(ip, px(150), bw, "USED", SMLSIZE, T.muted),
       label(ip, px(164), bw, str("capa"), 0, live),
+      label(ip, bh - px(42), bw, modelName, nameFont, T.text),    -- current model name
       label(ip, bh - px(22), bw, "WingLabs", SMLSIZE, T.muted),   -- brand mark, bottom left
     }))
 
