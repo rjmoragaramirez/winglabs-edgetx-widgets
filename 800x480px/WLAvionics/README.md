@@ -34,8 +34,10 @@ responsive for the whole flight.
 | Cells | 0 = auto, 1–14 | 0 |
 | CellWarn / CellCrit | centivolts per cell (350 = 3.50 V) | 350 / 330 |
 | AltWarn | alert altitude in ft/m, 0 = off | 400 |
-| Sounds / Haptic | on/off | on |
+| Sounds | Voice (radio voice), Tones, Off: GPS, battery %, altitude ceiling/low only | Voice |
+| Haptic | on/off | on |
 | MapPhoto | satellite photo under the map | on |
+| AltLow | low-altitude call in ft/m after climbing above it, 0 = off | 50 |
 
 Run *Discover new sensors* on the telemetry page with the model connected. Missing sensors are
 looked up again every 2 s.
@@ -92,7 +94,7 @@ WIDGETS/WLAvionics/
                + view (projection, automatic zoom with hysteresis, 4 image slots by tile parity)
   horizon.lua  attitude indicator in the WingLabs firmware style (WingUI): 5° pitch ladder,
                bank ticks, gold pointer (lines only, preallocated tables)
-  alerts.lua   priority banner + tones/voice/haptic with cooldowns; a repeating alert sounds at
+  alerts.lua   priority banner + haptic; sound only for GPS, battery %, altitude ceiling/low; a repeating alert sounds at
                most 3 times per episode, haptic = 3 short pulses (~80 ms)
   ui.lua       LVGL build (full screen and compact layouts)
   themes.lua   palettes (add themes here)
@@ -115,6 +117,7 @@ and 9 haptic pulses.
 
 ## Changes
 
+- **0.3.0** (2026-11-09): sound call-outs only for GPS fix/lost (rising/falling tone), battery every 10 % (FC Bat%, else a LiPo estimate from the smoothed cell voltage), altitude ceiling (*AltWarn*) and the new low-altitude call (*AltLow*, after climbing above it); numbers spoken with the radio's own voice pack. Arming, flight modes, telemetry lost, failsafe, battery low/critical and weak link are now silent (banner + haptic). Battery alerts use a ~3 s smoothed cell voltage so throttle sag no longer trips them. *Sounds* is now Voice / Tones / Off.
 - **0.2.1** (2026-10-07): photo tiles per map size (`/WLMAP/<field>/<ring px>/...`) so both map
   widgets share `/WLMAP`; scale label moves under HDG when the ring fills the width.
 - **0.2.0** (2026-10-07): optional satellite photo under the map (USGS NAIP, tiles per zoom step,
@@ -137,6 +140,5 @@ and 9 haptic pulses.
 
 ## Ideas
 
-- Custom voice files (WAV) for flight modes; today tones plus `playNumber` with the radio voice.
 - Flight statistics page (maximums) and touch in full screen to switch pages.
 - Log playback (non-blocking: incremental read per frame).

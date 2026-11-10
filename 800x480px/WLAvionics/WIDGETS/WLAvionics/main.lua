@@ -7,7 +7,7 @@
 --  * no full collectgarbage() calls; EdgeTX's incremental GC is enough with low churn
 --  * horizon drawn with LVGL lines only (no per-frame malloc'd triangle masks)
 
-local VERSION = "0.2.1"
+local VERSION = "0.3.0"
 -- SD folder name must stay <= 13 chars (EdgeTX path buffer); display name <= 20 chars
 local DEFAULT_PATH = "/WIDGETS/WLAvionics/"
 local THEME_NAMES = { "Dark", "Light", "Navy", "Sunlight", "Night", "Carbon" }
@@ -19,9 +19,11 @@ local options = {
   { "CellWarn", VALUE, 350, 300, 420 },  -- centivolts per cell
   { "CellCrit", VALUE, 330, 280, 400 },
   { "AltWarn", VALUE, 400, 0, 5000 },    -- in display units, 0 = off
-  { "Sounds", BOOL, 1 },
+  -- Sounds: 1 Voice (radio voice: battery %, altitude), 2 Tones only, 3 Off (was a BOOL; 0 after the upgrade = Voice)
+  { "Sounds", CHOICE or VALUE, 1, CHOICE and { "Voice", "Tones", "Off" } or 1, (not CHOICE) and 3 or nil },
   { "Haptic", BOOL, 1 },
   { "MapPhoto", BOOL, 1 },               -- satellite photo under the map (needs /WLMAP on the SD)
+  { "AltLow", VALUE, 50, 0, 1000 },      -- in display units, 0 = off; last: saved options are positional
 }
 
 local FIELDS_FILE = "/WLMAP/fields.lua"
@@ -39,7 +41,13 @@ local function applyOptions(wgt, opts)
   o.cellWarn = (opts.CellWarn or 350) / 100
   o.cellCrit = (opts.CellCrit or 330) / 100
   o.altWarn = opts.AltWarn or 0
-  o.alerts = (opts.Sounds or 1) == 1
+  o.altLow = opts.AltLow or 0
+  local snd = opts.Sounds or 1
+  -- EdgeTX turns the old on/off value into 0 when the option became a list: treat 0 (or any
+  -- out-of-range value) as Voice so an upgraded widget is not silently muted
+  if snd < 1 or snd > 3 then snd = 1 end
+  o.alerts = snd == 1 or snd == 2
+  o.voice = snd == 1
   o.haptic = (opts.Haptic or 1) == 1
   wgt.trail.photo = (opts.MapPhoto or 1) == 1
   wgt.telem.imperial = (opts.Units or 1) == 1

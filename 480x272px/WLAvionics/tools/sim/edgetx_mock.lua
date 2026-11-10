@@ -14,6 +14,7 @@ PREC1, PREC2 = 0x10, 0x20
 COLOR, BOOL, VALUE, SOURCE, STRING, CHOICE = 1, 2, 3, 4, 5, 6
 PLAY_NOW, PLAY_BACKGROUND = 1, 2
 UNIT_RAW, UNIT_VOLTS, UNIT_METERS, UNIT_FEET, UNIT_DEGREE, UNIT_RADIANS, UNIT_DB = 0, 1, 9, 10, 22, 23, 18
+UNIT_PERCENT = 13
 
 -- api -----------------------------------------------------------------------
 function getTime() return M.now end
@@ -37,7 +38,7 @@ end
 function playTone(f, d, p, fl, inc) M.log[#M.log + 1] = string.format("%.2fs tone %d", M.now / 100, f) end
 function playNumber(v, u, fl) M.log[#M.log + 1] = string.format("%.2fs number %s u%d", M.now / 100, tostring(v), u) end
 function playHaptic(d, p, fl) M.log[#M.log + 1] = string.format("%.2fs haptic %d/%d%s", M.now / 100, d, p, fl == PLAY_NOW and " NOW" or "") end
-function playFile(f) M.log[#M.log + 1] = "file " .. f end
+function playFile(f) M.log[#M.log + 1] = string.format("%.2fs file %s", M.now / 100, f) end
 
 lcd = {}
 function lcd.RGB(r, g, b)
@@ -57,6 +58,14 @@ function loadScript(path, mode)
   end
   local rel = string.gsub(path, "^/WIDGETS/WLAvionics/", "")
   return loadfile(ROOT .. rel, "t")
+end
+
+-- io.open on widget paths reads the local widget folder (the voice clip probe)
+local rawOpen = io.open
+function io.open(path, mode)
+  local rel = string.match(path, "^/WIDGETS/[^/]+/(.*)$")
+  if rel then return rawOpen(ROOT .. rel, mode) end
+  return rawOpen(path, mode)
 end
 
 -- lvgl mock -------------------------------------------------------------------

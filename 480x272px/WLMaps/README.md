@@ -24,7 +24,7 @@ point changes; the widget works around it and the simulator checks it).
    (EdgeTX silently skips widget folders over 13 characters).
 2. On the radio: *Model → Screens* → **Full screen** layout (Top bar, Sliders, Trims and Flight mode
    off) → widget **WL Maps**.
-3. Options: Theme, Units, Cells, CellWarn/CellCrit, AltWarn, Sounds/Haptic, MapPhoto
+3. Options: Theme, Units, Cells, CellWarn/CellCrit, AltWarn, Sounds (Voice/Tones/Off), Haptic, MapPhoto, AltLow
    (same meaning as in WL Avionics).
 
 ## Satellite photo (optional)
@@ -63,6 +63,7 @@ python tools/sim/run_sim.py
 
 ## Changes
 
+- **0.2.0** (2026-11-09): sound call-outs only for GPS fix/lost (rising/falling tone), battery every 10 % (FC Bat%, else a LiPo estimate from the smoothed cell voltage), altitude ceiling (*AltWarn*) and the new low-altitude call (*AltLow*, after climbing above it); numbers spoken with the radio's own voice pack. Arming, flight modes, telemetry lost, failsafe, battery low/critical and weak link are now silent (banner + haptic). Battery alerts use a ~3 s smoothed cell voltage so throttle sag no longer trips them. *Sounds* is now Voice / Tones / Off.
 - **0.1.0** (2026-10-07): first version, from WL Avionics 0.2.1 without the attitude indicator.
 
 ## To verify on the radio

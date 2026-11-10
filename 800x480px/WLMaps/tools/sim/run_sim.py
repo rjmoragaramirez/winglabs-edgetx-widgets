@@ -44,7 +44,7 @@ class Sim:
         self.widget = self.lua.globals().loadScript("/WIDGETS/WLMaps/main.lua")()
         self.zone = self.lua.table_from({"x": 0, "y": 0, "w": w, "h": h})
         self.opts = self.lua.table_from({"Theme": theme, "Units": units, "Cells": 0, "CellWarn": 350,
-                                         "CellCrit": 330, "AltWarn": 400, "Sounds": 1, "Haptic": 1})
+                                         "CellCrit": 330, "AltWarn": 400, "Sounds": 1, "Haptic": 1, "AltLow": 50})
         self.w, self.h, self.scale = w, h, scale
         self.ctx = self.widget.create(self.zone, self.opts, "/WIDGETS/WLMaps/")
         self.check()
@@ -291,7 +291,7 @@ def arrow_test(sim):
 
 
 def power_off_test():
-    """Model switched off after landing: telemetry-lost alert must stop after 3 bursts."""
+    """Model switched off after landing: telemetry-lost haptic must stop after 3 bursts, no sound."""
     s = Sim()
     tt = 0
     while tt <= 90 * 100:
@@ -303,9 +303,9 @@ def power_off_test():
         s.widget.refresh(s.ctx)
         tt += 5
     log = [l for l in s.M.log.values() if float(l.split("s ")[0]) > 20]
-    tones = [l for l in log if "tone 400" in l]
+    tones = [l for l in log if "tone 400" in l or "tlost.wav" in l]  # tone, or voice clip
     buzz = [l for l in log if "haptic" in l]
-    ok = len(tones) == 3 and len(buzz) == 9 and all(l.split("haptic ")[1].startswith("8/30") for l in buzz)
+    ok = len(tones) == 0 and len(buzz) == 9  # telemetry lost = haptic only (no sound) and all(l.split("haptic ")[1].startswith("8/30") for l in buzz)
     print(f"power-off test: {len(tones)} lost alerts, {len(buzz)} haptic pulses in 70 s -> {'PASS' if ok else 'FAIL'}")
     return ok
 

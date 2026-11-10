@@ -104,21 +104,31 @@ One banner shows the most important alert at any moment, in this priority order:
 
 | Alert | When | Sound and haptic |
 |---|---|---|
-| TELEMETRY LOST | The link drops after it was established | Low tone + 3 short pulses |
-| FAILSAFE | INAV reports failsafe | High tone + 3 short pulses |
-| BATTERY CRITICAL | Cell voltage at or below *CellCrit* | Cell voltage spoken + 3 short pulses |
-| BATTERY LOW | Cell voltage at or below *CellWarn* | Cell voltage spoken |
-| ALTITUDE | Armed and above *AltWarn* | Altitude spoken |
-| WEAK LINK | Link quality below 50 % | Short tone |
+| TELEMETRY LOST | The link drops after it was established | 3 short pulses |
+| FAILSAFE | INAV reports failsafe | 3 short pulses |
+| BATTERY CRITICAL | Cell voltage at or below *CellCrit* | 3 short pulses |
+| BATTERY LOW | Cell voltage at or below *CellWarn* | Banner only |
+| ALTITUDE | Armed and above *AltWarn* | High tone + altitude spoken |
+| LOW ALTITUDE | Armed, back below *AltLow* after climbing above it | Low tone + altitude spoken + 2 short pulses |
+| WEAK LINK | Link quality below 50 % | Banner only |
 | NO GPS FIX | Armed without a GPS fix | Banner only |
 
-- **Every repeating alert sounds at most three times** per episode, then goes quiet; the banner
-  stays. It re-arms as soon as the condition clears. Switch the model off after landing and you get
-  three "telemetry lost" alerts, not an endless loop.
-- **Haptic feedback is short pulses**, about 80 ms each: two when arming, one when disarming,
-  three for an alert.
-- Arming and disarming have their own tones, a flight-mode change while armed gives a short chirp,
-  and the return of the link a short high tone.
+- **Only four things make a sound**, so the radio stays quiet unless it matters:
+  - **GPS**: a rising tone when the fix is acquired, a falling tone if it drops while armed (a fix
+    change must last 2 seconds, so satellites hovering at the limit do not chatter);
+  - **Battery every 10 %** while armed: "90 percent" ... "10 percent". The
+    percentage comes from the flight controller (*Bat%*) or, without it, from a LiPo curve on the
+    cell voltage smoothed over about 3 seconds, so a punch of throttle does not trigger a call;
+  - **Altitude ceiling** (*AltWarn*): a high tone and the altitude, at most three times;
+  - **Low altitude** (*AltLow*): a low tone and the altitude, once, only after you have climbed
+    above it, so the take-off stays quiet.
+- Everything else (arming, flight modes, telemetry lost, failsafe, battery low/critical, weak link)
+  is shown on the banner and, for the important ones, felt as **short haptic pulses** of about
+  80 ms: two when arming, one when disarming, three for an alert. A repeating alert pulses at most
+  three times per episode; switch the model off after landing and you feel three, then nothing.
+- The numbers are spoken by the **radio's own voice pack**: same language and volume as the rest
+  of the radio's announcements, nothing extra to copy. *Sounds* chooses **Voice** (tones and
+  numbers), **Tones** (tones only) or **Off**.
 
 ### Themes
 
@@ -230,9 +240,10 @@ Open *Screens setup*, select the widget's zone and choose *Widget settings*:
 | CellWarn | 300–420 | 350 | Centivolts per cell: 350 = 3.50 V (BATTERY LOW) |
 | CellCrit | 280–400 | 330 | 330 = 3.30 V (BATTERY CRITICAL) |
 | AltWarn | 0–5000 | 400 | In ft or m; 0 = off |
-| Sounds | on/off | on | Tones and voice |
+| Sounds | Voice, Tones, Off | Voice | GPS, battery %, altitude ceiling and low altitude only. Voice = tones + numbers in the radio's voice; Tones = tones only |
 | Haptic | on/off | on | Vibration pulses |
 | MapPhoto | on/off | on | WL Avionics and WL Maps only |
+| AltLow | 0–1000 | 50 | In ft or m (15 for metric); low-altitude call after climbing above it; 0 = off |
 
 WL Flight Stats has fewer options: Theme, Units and Cells as above, plus **MinFlight** (5–300 s,
 default 20): how long the model must be armed for the flight to be saved.
@@ -268,14 +279,14 @@ whose photo area contains home.
 ## 4. In flight
 
 1. **Power up and wait for GPS.** The pill shows WAIT GPS and the home card shows the satellite count.
-2. **Arm.** You hear the arm tone and feel two pulses; the timer starts and home is set with the
+2. **Arm.** You feel two pulses; the timer starts and home is set with the
    current GPS position.
 3. **Fly.** The map zooms out as you go farther, the trail draws your path and the home arrow and
    distance guide you back.
 4. **Alerts** appear as a banner, with voice and pulses for the important ones, at most three
    times each.
-5. **Land and disarm.** One pulse and the disarm tone. Switch the model off: three "telemetry lost"
-   alerts and then silence. The last position stays on screen.
+5. **Land and disarm.** One pulse. Switch the model off: three "telemetry lost"
+   pulses and then nothing. The last position stays on screen.
 6. **Review the flight.** Swipe to the WL Flight Stats screen: the flight you just landed is
    already there.
 
@@ -340,16 +351,16 @@ It also renders screenshots like the ones in this article.
 
 | Widget | Version | Status |
 |---|---|---|
-| WL Attitude Ind | 0.2.0 | Version 0.1 flown on a TX16S MK2; 0.2 validated in the simulator |
-| WL Avionics | 0.2.1 | Validated in the simulator |
-| WL Maps | 0.1.0 | Validated in the simulator |
+| WL Attitude Ind | 0.3.0 | Version 0.2 flown on a TX16S MK2; sound call-outs validated in the simulator |
+| WL Avionics | 0.3.0 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
+| WL Maps | 0.2.0 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
 | WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flights saved after landing, charts, history browsing and reload after a power cycle confirmed |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 
 Still to confirm on the radio: the exact font sizes, how the vibration pulses feel, tile loading
 time when crossing photo tiles, and that the aircraft position over the photo matches the ground.
 
-Ideas for next versions: custom voice files for flight modes and log playback.
+Ideas for next versions: log playback.
 
 ---
 
