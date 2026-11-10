@@ -65,14 +65,14 @@ def mercator(lat, lon):
     return math.radians(lon) * R_EARTH, math.log(math.tan(math.pi / 4 + math.radians(lat) / 2)) * R_EARTH
 
 
-def fetch(bbox, size, darken, quality, retries=4):
+def fetch(bbox, size, darken, quality, retries=6):
     url = (f"{SERVICE}?bbox={bbox[0]:.3f},{bbox[1]:.3f},{bbox[2]:.3f},{bbox[3]:.3f}"
            f"&bboxSR=3857&imageSR=3857&size={size},{size}&format=jpg"
            f"&interpolation=RSP_BilinearInterpolation&f=image")
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            data = urllib.request.urlopen(req, timeout=60).read()
+            data = urllib.request.urlopen(req, timeout=90).read()
             im = Image.open(io.BytesIO(data)).convert("RGB")
             if im.size != (size, size):
                 raise ValueError(f"unexpected size {im.size}")
@@ -84,7 +84,7 @@ def fetch(bbox, size, darken, quality, retries=4):
         except Exception as e:  # network hiccup / server busy: back off and retry
             if attempt == retries - 1:
                 raise RuntimeError(f"tile failed after {retries} tries: {e}")
-            time.sleep(2 * (attempt + 1))
+            time.sleep(min(60, 5 * 2 ** attempt))   # 5, 10, 20, 40, 60 s: give a busy server time
 
 
 def write_fields_lua(registry):
@@ -117,6 +117,7 @@ def main():
     ap.add_argument("--workers", type=int, default=3, help="parallel downloads (be polite)")
     ap.add_argument("--min-level", type=int, default=1,
                     help="first zoom level with photo (4 = 1000 ft): skip the fine levels for big areas")
+    ap.add_argument("--retries", type=int, default=6, help="tries per tile before it is skipped")
     ap.add_argument("--dry-run", action="store_true", help="only print the tile plan")
     ap.add_argument("--out", default=None, help="output WLMAP folder (default: tools/maptiles/out/WLMAP)")
     a = ap.parse_args()
@@ -183,10 +184,16 @@ def main():
         return os.path.join(base, str(p[0]), str(p[1]), f"{p[2]}_{p[3]}.jpg")
     todo = [p for p in plan if not os.path.exists(tile_path(p))]
     print(f"{len(plan) - len(todo)} already downloaded, {len(todo)} to go")
-    lock, done = threading.Lock(), [0]
+    lock, done, failed = threading.Lock(), [0], []
 
     def work(p):
-        data = fetch(p[4], p[5], a.darken, a.quality)
+        try:
+            data = fetch(p[4], p[5], a.darken, a.quality, max(1, a.retries))
+        except Exception as e:  # server busy: skip this tile, keep going, report at the end
+            with lock:
+                failed.append(p)
+                print(f"  skipped ring {p[0]} level {p[1]} tile {p[2]}_{p[3]}: {e}", flush=True)
+            return
         dst = tile_path(p)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         with open(dst + ".tmp", "wb") as fh:
@@ -199,6 +206,11 @@ def main():
 
     with ThreadPoolExecutor(max_workers=max(1, min(a.workers, 4))) as ex:
         list(ex.map(work, todo))
+
+    if failed:
+        # The field is registered only when complete, so the radio never shows missing tiles
+        sys.exit(f"{len(failed)} of {len(todo)} tiles failed (server busy). {done[0]} downloaded now; "
+                 f"re-run the same command to fetch the rest. '{name}' is not registered until complete.")
 
     reg_path = os.path.join(OUT, "fields.json")
     registry = {}
