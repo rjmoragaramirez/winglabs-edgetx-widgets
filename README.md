@@ -351,9 +351,9 @@ It also renders screenshots like the ones in this article.
 
 | Widget | Version | Status |
 |---|---|---|
-| WL Attitude Ind | 0.3.0 | Version 0.2 flown on a TX16S MK2; sound call-outs validated in the simulator |
-| WL Avionics | 0.3.1 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
-| WL Maps | 0.2.1 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
+| WL Attitude Ind | 0.3.0 | Version 0.2 flown on a TX16S MK2; sound call-outs confirmed on a TX16S MK2 |
+| WL Avionics | 0.3.1 | Flown on a TX16S MK2; sound call-outs and the satellite photo (imperial and metric) confirmed on a TX16S MK2 |
+| WL Maps | 0.2.1 | Flown on a TX16S MK2; sound call-outs and the satellite photo (imperial and metric) confirmed on a TX16S MK2 |
 | WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flights saved after landing, charts, history browsing and reload after a power cycle confirmed |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 
