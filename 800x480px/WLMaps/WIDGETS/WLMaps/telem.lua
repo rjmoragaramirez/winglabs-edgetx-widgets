@@ -175,6 +175,12 @@ return function()
     put("sats", t.sats, "SAT %d")
 
     if t.armed and not t.home and t.fix then t.home = { lat = t.lat, lon = t.lon } end
+    -- Before the first arm, a provisional home follows the model so the map and its photo show on
+    -- the bench; arming replaces it with the real home (resetFlight), landing keeps the real one
+    if not t.armed and t.fix and (not t.home or t.home.provisional) then
+      t.home = t.home or { provisional = true }
+      t.home.lat, t.home.lon = t.lat, t.lon
+    end
 
     -- Home distance and direction (flat earth on deltas, float32 safe)
     if t.home and t.fix then

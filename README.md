@@ -235,7 +235,7 @@ Open *Screens setup*, select the widget's zone and choose *Widget settings*:
 | Option | Values | Default | Notes |
 |---|---|---|---|
 | Theme | Dark, Light, Navy, Sunlight, Night, Carbon | Dark | |
-| Units | Imperial, Metric | Imperial | The photo map works in imperial |
+| Units | Imperial, Metric | Imperial | Metric map scales are 30 m, 61 m, 152 m... (the same rings as 100, 200, 500 ft, so the photo works in both) |
 | Cells | 0 = auto, 1–14 | 0 | Auto-detects the cell count when disarmed |
 | CellWarn | 300–420 | 350 | Centivolts per cell: 350 = 3.50 V (BATTERY LOW) |
 | CellCrit | 280–400 | 330 | 330 = 3.30 V (BATTERY CRITICAL) |
@@ -352,8 +352,8 @@ It also renders screenshots like the ones in this article.
 | Widget | Version | Status |
 |---|---|---|
 | WL Attitude Ind | 0.3.0 | Version 0.2 flown on a TX16S MK2; sound call-outs validated in the simulator |
-| WL Avionics | 0.3.0 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
-| WL Maps | 0.2.0 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
+| WL Avionics | 0.3.1 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
+| WL Maps | 0.2.1 | Flown on a TX16S MK2; sound call-outs validated in the simulator |
 | WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flights saved after landing, charts, history browsing and reload after a power cycle confirmed |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 

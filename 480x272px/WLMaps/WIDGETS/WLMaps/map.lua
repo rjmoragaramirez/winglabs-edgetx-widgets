@@ -30,14 +30,17 @@ local STEPS = {
                { 1000 * FT, "1000 ft" }, { 2000 * FT, "2000 ft" }, { 804.672, "0.5 mi" },
                { 1609.344, "1 mi" }, { 3218.688, "2 mi" }, { 8046.72, "5 mi" }, { 16093.44, "10 mi" },
                { 32186.88, "20 mi" } },
-  metric = { { 50, "50 m" }, { 100, "100 m" }, { 200, "200 m" }, { 500, "500 m" }, { 1000, "1 km" },
-             { 2000, "2 km" }, { 5000, "5 km" }, { 10000, "10 km" }, { 20000, "20 km" },
-             { 50000, "50 km" } },
 }
+-- Metric uses the same ring distances (the photo tiles are cut for them), labelled in meters
+STEPS.metric = {}
+for i, l in ipairs({ "30 m", "61 m", "152 m", "305 m", "610 m", "805 m", "1.6 km", "3.2 km", "8 km",
+                     "16 km", "32 km" }) do
+  STEPS.metric[i] = { STEPS.imperial[i][1], l }
+end
 
 return function()
   local tr = { n = {}, e = {}, count = 0, flight = nil, maxN = 0, maxE = 0, minD = 3,
-               fields = {}, photo = true, field = nil, fieldFlight = nil }
+               fields = {}, photo = true, field = nil, fieldFlight = false }  -- false: not picked yet (flight is nil before the first arm)
 
   local function reset()
     tr.count, tr.maxN, tr.maxE = 0, 0, 0
@@ -122,7 +125,7 @@ return function()
     local function photo(t, lvl, mpp)
       local sl = v.slots
       for i = 1, 4 do sl[i].on = false end
-      if not (tr.photo and t.home and t.imperial) then return false end
+      if not (tr.photo and t.home) then return false end
       local f = pickField(t)
       local rl = f and f.rings and f.rings[r]          -- tiles made for this map size (ring px)
       if not rl then return false end
@@ -172,21 +175,29 @@ return function()
         if steps[k][1] >= need then i = k break end
       end
       if i > cur or (i < cur and need * 1.25 <= steps[i][1]) then cur = i end
-      local S = steps[cur][1]
+      -- Over a photo field, zoom out to the nearest step that has photo tiles here
+      -- (e.g. a field made with --min-level 4 has no photo at 100-500 ft)
+      local lvl = cur
+      v.photoOn = false
+      if tr.photo and t.home then
+        for L = cur, #steps do
+          if photo(t, L, steps[L][1] / r) then lvl, v.photoOn = L, true break end
+        end
+      end
+      if not v.photoOn then photo(t, 0, 1) end  -- level 0 never exists: hides every slot
+      local S = steps[lvl][1]
       local ppm = r / S
       tr.minD = max(3, 3 / ppm)              -- new sample every ~3 px on screen
-      v.scaleText = steps[cur][2]
-
-      v.photoOn = photo(t, cur, S / r)
+      v.scaleText = steps[lvl][2]
 
       local px, py = cx + t.de * ppm, cy - t.dn * ppm
       local hq = floor(t.hdg / 5 + 0.5) * 5
       local qx, qy = floor(px + 0.5), floor(py + 0.5)
       local k = lastKey
-      if k.x == qx and k.y == qy and k.h == hq and k.s == cur and k.c == tr.count and k.f == tr.flight then
+      if k.x == qx and k.y == qy and k.h == hq and k.s == lvl and k.c == tr.count and k.f == tr.flight then
         return false
       end
-      k.x, k.y, k.h, k.s, k.c, k.f = qx, qy, hq, cur, tr.count, tr.flight
+      k.x, k.y, k.h, k.s, k.c, k.f = qx, qy, hq, lvl, tr.count, tr.flight
 
       -- Aircraft arrow (north up, rotated by heading): nose, right wing, notch, left wing, nose
       local a = rad(hq)

@@ -117,6 +117,7 @@ and 9 haptic pulses.
 
 ## Changes
 
+- **0.3.1** (2026-11-09): the satellite photo now shows in **metric** too (metric map steps use the same ring distances as the tiles: 30 m, 61 m, 152 m...); over a photo field the map zooms out to the nearest step that has tiles (fields made with --min-level); before the first arm a provisional home follows the model, so the map and photo show on the bench.
 - **0.3.0** (2026-11-09): sound call-outs only for GPS fix/lost (rising/falling tone), battery every 10 % (FC Bat%, else a LiPo estimate from the smoothed cell voltage), altitude ceiling (*AltWarn*) and the new low-altitude call (*AltLow*, after climbing above it); numbers spoken with the radio's own voice pack. Arming, flight modes, telemetry lost, failsafe, battery low/critical and weak link are now silent (banner + haptic). Battery alerts use a ~3 s smoothed cell voltage so throttle sag no longer trips them. *Sounds* is now Voice / Tones / Off.
 - **0.2.1** (2026-10-07): photo tiles per map size (`/WLMAP/<field>/<ring px>/...`) so both map
   widgets share `/WLMAP`; scale label moves under HDG when the ring fills the width.
