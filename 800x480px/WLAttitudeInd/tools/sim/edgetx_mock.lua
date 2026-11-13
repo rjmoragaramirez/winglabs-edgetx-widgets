@@ -50,6 +50,12 @@ function lcd.drawText() end
 function lcd.sizeText(s, f) return #tostring(s) * (f == SMLSIZE and 6 or 9), 16 end
 
 model = {}
+-- TIMER1: 5:00 countdown from sim start unless M.timer1 = { value=, start=, mode= } is set
+function model.getTimer(i)
+  if i ~= 0 then return nil end
+  if M.timer1 then return M.timer1 end
+  return { mode = 1, start = 300, value = 300 - M.now // 100, name = "" }
+end
 function model.getInfo() return { name = M.modelName or os.getenv("WL_SIM_MODEL") or "Extra 330", bitmap = "" } end
 
 function loadScript(path, mode)

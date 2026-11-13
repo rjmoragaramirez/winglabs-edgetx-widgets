@@ -46,12 +46,13 @@ return function()
     dist = 0, homeRel = 0, spd = 0, alt = 0, vspd = 0, hdg = 0,
     pitch = 0, roll = 0,
     armTime = 0, flown = 0,
+    tmrSev = 0,  -- TIMER1 color: 0 normal, 2 last minute of a countdown, 3 countdown expired
     -- unit settings (set from options)
     imperial = true, cellsOpt = 0,
     s = { mode = "NO LINK", lq = "LQ --", radio = "", sats = "SAT --",
           cellV = "-.--V", volt = "--.-V", cells = "", curr = "--.-A", capa = "---- mAh", pct = "",
           alt = "---", altU = "ft", vspd = "", spd = "---", spdU = "mph", dist = "---", distU = "ft",
-          hdg = "---", timer = "00:00", state = "NO LINK", roll = "--.-", pitch = "--.-" },
+          hdg = "---", timer = "00:00", tmr = "--:--", state = "NO LINK", roll = "--.-", pitch = "--.-" },
   }
 
   local function discover()
@@ -123,6 +124,29 @@ return function()
     if last.timer ~= secs then
       last.timer = secs
       t.s.timer = fmt("%02d:%02d", secs // 60, secs % 60)
+    end
+
+    -- TIMER1 from the model settings (runs on the radio, independent of the link)
+    local tm = model.getTimer and model.getTimer(0)
+    local tv = tm and tm.mode ~= 0 and tm.value
+    if last.tmr ~= tv then
+      last.tmr = tv
+      if not tv then
+        t.s.tmr, t.tmrSev = "OFF", 0
+      else
+        local a = tv < 0 and -tv or tv
+        local sign = tv < 0 and "-" or ""
+        if a >= 3600 then
+          t.s.tmr = fmt("%s%d:%02d:%02d", sign, a // 3600, a // 60 % 60, a % 60)
+        else
+          t.s.tmr = fmt("%s%02d:%02d", sign, a // 60, a % 60)
+        end
+        if (tm.start or 0) > 0 then
+          t.tmrSev = tv <= 0 and 3 or (tv <= 60 and 2 or 0)
+        else
+          t.tmrSev = 0
+        end
+      end
     end
 
     if not t.linked then

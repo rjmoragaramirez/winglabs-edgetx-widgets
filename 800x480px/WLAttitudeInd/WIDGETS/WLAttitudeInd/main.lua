@@ -7,7 +7,7 @@
 --  * no full collectgarbage() calls; EdgeTX's incremental GC is enough with low churn
 --  * horizon drawn with LVGL lines only (no per-frame malloc'd triangle masks)
 
-local VERSION = "0.3.0"
+local VERSION = "0.4.0"
 -- SD folder name must stay <= 13 chars (EdgeTX path buffer); display name <= 20 chars
 local DEFAULT_PATH = "/WIDGETS/WLAttitudeInd/"
 local THEME_NAMES = { "Dark", "Light", "Navy", "Sunlight", "Night", "Carbon" }

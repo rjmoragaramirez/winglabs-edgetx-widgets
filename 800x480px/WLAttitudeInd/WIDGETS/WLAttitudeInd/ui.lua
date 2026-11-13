@@ -31,6 +31,10 @@ return function(wgt)
     if not t.linked then return T.crit end
     return t.armed and T.warn or T.muted
   end
+  local function tmrColor()
+    if t.tmrSev >= 3 then return T.crit elseif t.tmrSev == 2 then return T.warn end
+    return T.text
+  end
   local function satColor() return t.fix and T.ok or T.warn end
   local function live() return t.linked and T.text or T.muted end  -- last-known values dim
   local function battFrac()
@@ -233,32 +237,40 @@ return function(wgt)
     local hx = pad * 2 + side
     add(horizonView(hx, y0, W - 2 * side - 4 * pad, bh))
 
-    -- Right column
+    -- Right column: altitude | ground speed | TIMER1 | home
     local rx = W - pad - side
-    local altH = floor(bh * 0.40)
-    local spdH = floor(bh * 0.26)
-    local homeH = bh - altH - spdH - 2 * pad
+    local altH = floor(bh * 0.32)
+    local spdH = floor(bh * 0.19)
+    local tmrH = spdH
+    local homeH = bh - altH - spdH - tmrH - 3 * pad
     add(card(rx, y0, side, altH, {
       label(ip, ip - 2, bw, "ALTITUDE", SMLSIZE, T.muted),
       label(ip, ip - 2, bw, str("altU"), SMLSIZE, T.muted, RIGHT),
-      label(ip, px(20), bw, str("alt"), DBLSIZE, live),
-      label(ip, altH - px(20), bw, str("vspd"), SMLSIZE, T.muted),
+      label(ip, px(16), bw, str("alt"), DBLSIZE, live),
+      label(ip, altH - px(19), bw, str("vspd"), SMLSIZE, T.muted),
     }))
-    add(card(rx, y0 + altH + pad, side, spdH, {
+    local y = y0 + altH + pad
+    add(card(rx, y, side, spdH, {
       label(ip, ip - 2, bw, "GND SPEED", SMLSIZE, T.muted),
       label(ip, ip - 2, bw, str("spdU"), SMLSIZE, T.muted, RIGHT),
-      label(ip, px(20), bw, str("spd"), MIDSIZE, live),
+      label(ip, px(16), bw, str("spd"), MIDSIZE, live),
     }))
-    local ar = max(px(10), min(px(16), floor((homeH - px(24)) / 2)))
+    y = y + spdH + pad
+    add(card(rx, y, side, tmrH, {
+      label(ip, ip - 2, bw, "TIMER 1", SMLSIZE, T.muted),
+      label(ip, px(16), bw, str("tmr"), MIDSIZE, tmrColor),
+    }))
+    y = y + tmrH + pad
+    local ar = max(px(10), min(px(15), floor((homeH - px(24)) / 2)))
     local hc = {
       label(ip, ip - 2, bw, "HOME", SMLSIZE, T.muted),
       label(ip, ip - 2, bw, str("sats"), SMLSIZE, satColor, RIGHT),
-      label(ip, px(24), bw, str("dist"), MIDSIZE, live),
+      label(ip, px(16), bw, str("dist"), MIDSIZE, live),
       label(ip, homeH - px(18), bw, str("distU"), SMLSIZE, T.muted),
     }
     local c1, c2, c3 = homeArrow(side - ip - ar, homeH - ip - ar, ar)
     hc[#hc + 1], hc[#hc + 2], hc[#hc + 3] = c1, c2, c3
-    add(card(rx, y0 + altH + spdH + 2 * pad, side, homeH, hc))
+    add(card(rx, y, side, homeH, hc))
 
     -- Split into several build calls (very large tables can fail when compiled)
     for i = 1, #ui do lvgl.build({ ui[i] }) end
