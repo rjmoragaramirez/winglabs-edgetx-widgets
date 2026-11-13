@@ -117,6 +117,10 @@ def main():
     ap.add_argument("--workers", type=int, default=3, help="parallel downloads (be polite)")
     ap.add_argument("--min-level", type=int, default=1,
                     help="first zoom level with photo (4 = 1000 ft): skip the fine levels for big areas")
+    ap.add_argument("--fine-mi", type=float, default=None,
+                    help="coverage radius (miles) of the three finest levels instead of the "
+                         "per-layout default; use it for a small area you want sharp at every "
+                         "zoom, e.g. one park (also lifts the tiles-per-side cap of those levels)")
     ap.add_argument("--retries", type=int, default=6, help="tries per tile before it is skipped")
     ap.add_argument("--dry-run", action="store_true", help="only print the tile plan")
     ap.add_argument("--out", default=None, help="output WLMAP folder (default: tools/maptiles/out/WLMAP)")
@@ -142,9 +146,12 @@ def main():
         for li, step in enumerate(STEPS[:NLEVELS], start=1):
             if li < a.min_level:
                 continue
-            cov = min(radius_m, fine[li - 1] * MI) if li <= len(fine) else radius_m
+            fine_level = li <= len(fine)
+            fine_mi = a.fine_mi if (fine_level and a.fine_mi) else (fine[li - 1] if fine_level else None)
+            cov = min(radius_m, fine_mi * MI) if fine_level else radius_m
             mpp = step / ring                     # ground meters per screen pixel at this zoom
-            n = min(RADIOS[rk]["max_n"], max(1, math.ceil(2 * cov / (mpp * TILE))))
+            max_n = 128 if (fine_level and a.fine_mi) else RADIOS[rk]["max_n"]
+            n = min(max_n, max(1, math.ceil(2 * cov / (mpp * TILE))))
             levels[li] = n
             half = n * TILE / 2
             for j in range(n):
@@ -175,7 +182,11 @@ def main():
                 have = open(mark).read().strip() if os.path.exists(mark) else None
                 if have is not None and have != want:
                     print(f"  ring {ring} level {li}: grid changed ({have} -> {want}), re-downloading")
-                    shutil.rmtree(d)
+                    # OneDrive/Explorer can hold the folder open: delete the files, keep the dir
+                    shutil.rmtree(d, ignore_errors=True)
+                    if os.path.isdir(d):
+                        for f in os.listdir(d):
+                            os.remove(os.path.join(d, f))
             os.makedirs(d, exist_ok=True)
             with open(mark, "w") as fh:
                 fh.write(want)

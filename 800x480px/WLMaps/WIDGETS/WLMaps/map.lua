@@ -121,7 +121,8 @@ return function()
       return tr.field
     end
 
-    -- Place the photo tiles for zoom level `lvl` (meters per pixel mpp); false = no photo here
+    -- Place the photo tiles for zoom level `lvl` (meters per pixel mpp).
+    -- Returns any (some tile on screen), full (the tiles cover the whole map area)
     local function photo(t, lvl, mpp)
       local sl = v.slots
       for i = 1, 4 do sl[i].on = false end
@@ -151,7 +152,7 @@ return function()
           any = true
         end
       end
-      return any
+      return any, any and ox <= 0 and oy <= 0 and ox + n * T >= W and oy + n * T >= H
     end
 
     local ax, ay = {}, {}
@@ -175,13 +176,22 @@ return function()
         if steps[k][1] >= need then i = k break end
       end
       if i > cur or (i < cur and need * 1.25 <= steps[i][1]) then cur = i end
-      -- Over a photo field, zoom out to the nearest step that has photo tiles here
-      -- (e.g. a field made with --min-level 4 has no photo at 100-500 ft)
+      -- Over a photo field, zoom out to the nearest step whose tiles cover the whole map
+      -- (a field made with --min-level 4 has no photo at 100-500 ft, and the fine levels
+      -- only cover a small radius around the field center); if no step covers it all,
+      -- use the nearest step with some photo
       local lvl = cur
       v.photoOn = false
       if tr.photo and t.home then
+        local partial
         for L = cur, #steps do
-          if photo(t, L, steps[L][1] / r) then lvl, v.photoOn = L, true break end
+          local any, full = photo(t, L, steps[L][1] / r)
+          if full then lvl, v.photoOn = L, true break end
+          if any and not partial then partial = L end
+        end
+        if not v.photoOn and partial then
+          photo(t, partial, steps[partial][1] / r)
+          lvl, v.photoOn = partial, true
         end
       end
       if not v.photoOn then photo(t, 0, 1) end  -- level 0 never exists: hides every slot
