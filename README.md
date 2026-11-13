@@ -44,6 +44,9 @@ All three flight widgets share the same frame around the center area:
   fixed), percentage with a bar, current and consumed mAh.
 - **Altitude card**: altitude and vertical speed.
 - **Ground speed card**.
+- **Timer 1 card**: the model's Timer 1 as mm:ss (h:mm:ss after an hour), or OFF when the timer
+  is disabled. A countdown timer turns amber in its last 60 seconds and red at zero, then shows the
+  time over with a minus sign.
 - **Home card**: distance to home, GPS satellites (green once there is a fix with 6 or more satellites) and an arrow that points
   home relative to the aircraft's heading.
 
@@ -266,13 +269,16 @@ python tools/maptiles/make_field.py --name ama --lat 40.1666 --lon -85.3195 --ra
 - It makes the tile sets for both map widgets of that screen size and downloads only what is
   missing, so it can be stopped and restarted.
 - Run it once per field.
+- For a small field you want sharp at every zoom, add `--fine-mi 2`: the three closest zoom
+  steps then cover 2 miles around the field instead of the default radius.
 - A 5-mile radius takes about 25 MB on the MK2 and about 70 MB on the MK3.
 
 Then copy `tools\maptiles\out\WLMAP` to the **root** of the SD card, so it ends up as `/WLMAP/`.
 WL Avionics and WL Maps share this folder.
 
 On the radio, the widget picks the field automatically: when you arm, it uses the nearest field
-whose photo area contains home.
+whose photo area contains home. At each zoom it uses the nearest step whose photo fills the whole
+map, so you never see half a photo.
 
 ---
 
@@ -325,7 +331,7 @@ for a whole flight:
   intervals that keep the lowest voltage and the highest current, altitude and speed, and the
   intervals double in length when the buffer fills. Its page is built in stages, one chart per
   frame, so no call comes near the processor limit.
-- No global variables, and the model's timers are never touched.
+- No global variables, and the model's timers are only read (for the Timer 1 card), never changed.
 
 Every build has a **desktop simulator**: `tools/sim/run_sim.py`, which needs Python with lupa and
 Pillow. It runs the real widget code against a strict model of the EdgeTX API and flies a
@@ -351,9 +357,9 @@ It also renders screenshots like the ones in this article.
 
 | Widget | Version | Status |
 |---|---|---|
-| WL Attitude Ind | 0.3.0 | Version 0.2 flown on a TX16S MK2; sound call-outs confirmed on a TX16S MK2 |
-| WL Avionics | 0.3.1 | Flown on a TX16S MK2; sound call-outs and the satellite photo (imperial and metric) confirmed on a TX16S MK2 |
-| WL Maps | 0.2.1 | Flown on a TX16S MK2; sound call-outs and the satellite photo (imperial and metric) confirmed on a TX16S MK2 |
+| WL Attitude Ind | 0.4.0 | Version 0.2 flown on a TX16S MK2; sound call-outs and the Timer 1 card confirmed on a TX16S MK2 |
+| WL Avionics | 0.4.0 | Flown on a TX16S MK2; sound call-outs, the satellite photo (imperial and metric) and the Timer 1 card confirmed on a TX16S MK2 |
+| WL Maps | 0.3.0 | Flown on a TX16S MK2; sound call-outs, the satellite photo (imperial and metric) and the Timer 1 card confirmed on a TX16S MK2 |
 | WL Flight Stats | 0.1.0 | Flown on a TX16S MK2: flights saved after landing, charts, history browsing and reload after a power cycle confirmed |
 | MK3 builds | same versions | Validated in the simulator at 800×480; waiting for hardware |
 
